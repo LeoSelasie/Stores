@@ -159,7 +159,7 @@ public class jplTransaction extends JPanel {
 
         tfQuantity.setEditable(false);
 
-        cbItem.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cbItem.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4", "orange" }));
         cbItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cbItemActionPerformed(evt);
@@ -330,9 +330,9 @@ public class jplTransaction extends JPanel {
                             .addComponent(tfTransactionDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel7))
                         .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel3)
-                            .addComponent(tfCollector, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(tfCollector, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel3))
                         .addGap(18, 18, 18)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(tfUserCode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -387,25 +387,49 @@ public class jplTransaction extends JPanel {
         tfUserCode1.setText(initial.toString());
        
             txtReciept.append("\n"+cbItem.getSelectedItem().toString()+ "\t\t      "+ p+" X "+ q+"\t\t   ₵" + total);
-       
+       String valu,ds;
+                    double intvalue;
+            double newval,newval1;
         String query="insert into transaction values ('"+tfTransactionId.getText()+"','"+cbItem.getSelectedItem().toString()+"','"+tfCollector.getText()+"', '"+tfUnitCost.getText()+"', '"+tfQuantity.getText()+"','"+tfUserCode.getText()+"','"+tfTransactionDate.getText()+"')";
         try{
            if(utility.DBconnection.getStatement().executeUpdate(query)>0){
-               JOptionPane.showMessageDialog(null, "Successfully saved Transaction");
-                tfTransactionId.setText("");
-                cbItem.setSelectedItem("");
-                tfCollector.setText("");
-                tfUnitCost.setText("");
-                tfQuantity.setText("");
-                tfUserCode.setText("");
-                tfTransactionDate.setText("");
+              
+                String query1 = "Select * from item where Item_name='"+cbItem.getSelectedItem().toString()+"'";
+            
+                ResultSet rs = utility.DBconnection.getStatement().executeQuery(query1);
+                while(rs.next()){
+                   
+                    valu=rs.getString("Quantity");
+                    intvalue=Double.parseDouble(valu);
+                ds=tfQuantity.getText();
+                newval1=Double.parseDouble(ds);
+                newval = intvalue - newval1;
+                if (newval >= 0){
+                     String query2 = "update item set Quantity='"+newval+"' where Item_name='"+cbItem.getSelectedItem().toString()+"'";
+                    if (utility.DBconnection.getStatement().executeUpdate(query2)>0){
+                     JOptionPane.showMessageDialog(null, "Successfully saved Transaction");
+             
                initialization();
            }else{
                JOptionPane.showMessageDialog(null, "Could not save data");
            }
+                }
+                else
+                {
+                    JOptionPane.showMessageDialog(null, "Out of stock");
+                    return;
+                }
+                   
+                }
+                    
+                
+       
+           }
         }catch(Exception e){
             JOptionPane.showMessageDialog(null, "Error: "+e.getMessage());
         }
+                
+            
                
     }//GEN-LAST:event_bnSaveActionPerformed
 
